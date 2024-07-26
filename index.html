@@ -176,13 +176,17 @@
     }
 
     .dock .app-icon {
-      width: 50px;
-      height: 50px;
+      width: 60px;
+      height: 60px;
       margin: 0 5px;
     }
 
     .dock .app-icon i {
-      font-size: 20px;
+      font-size: 24px;
+    }
+
+    .dock .app-name {
+      display: none;
     }
 
     .category-title {
@@ -276,6 +280,15 @@
         category.classList.remove('active');
       }
       document.getElementById(categoryName).classList.add('active');
+
+      // 更新底部导航栏的活跃状态
+      const dockIcons = categoryDock.getElementsByClassName('app-icon');
+      for (let icon of dockIcons) {
+        icon.classList.remove('active');
+        if (icon.dataset.category === categoryName) {
+          icon.classList.add('active');
+        }
+      }
     }
 
     Object.keys(categories).forEach(categoryName => {
@@ -303,6 +316,7 @@
       const dockIcon = document.createElement('a');
       dockIcon.className = 'app-icon';
       dockIcon.href = '#';
+      dockIcon.dataset.category = categoryName;
       dockIcon.innerHTML = `
         <i class="${category.icon}"></i>
         <span class="app-name">${category.name}</span>
@@ -356,5 +370,35 @@
         }
       });
     });
+
+    // 添加移动设备上的滑动功能
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    categoryDock.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, false);
+
+    categoryDock.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, false);
+
+    function handleSwipe() {
+      if (touchEndX < touchStartX) {
+        // 向左滑动
+        const nextIcon = document.querySelector('#category-dock .app-icon.active').nextElementSibling;
+        if (nextIcon) {
+          nextIcon.click();
+        }
+      }
+      if (touchEndX > touchStartX) {
+        // 向右滑动
+        const prevIcon = document.querySelector('#category-dock .app-icon.active').previousElementSibling;
+        if (prevIcon) {
+          prevIcon.click();
+        }
+      }
+    }
   </script>
 </body></html>
