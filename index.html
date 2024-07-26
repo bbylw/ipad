@@ -1,0 +1,332 @@
+
+<html><head><base href="https://example.com/ipadOS-nav/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能设备导航</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root {
+    --primary-color: #6e45e2;
+    --secondary-color: #88d3ce;
+    --text-color: white;
+    --bg-color: rgba(255, 255, 255, 0.2);
+    --hover-bg-color: rgba(255, 255, 255, 0.3);
+    --shadow-color: rgba(0, 0, 0, 0.3);
+  }
+
+  body, html {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    color: var(--text-color);
+  }
+
+  .status-bar {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 5px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+  }
+
+  .container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .app-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px 0;
+  }
+
+  .app-icon {
+    width: 80px;
+    height: 80px;
+    background-color: var(--bg-color);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+
+  .app-icon:hover, .app-icon:focus {
+    transform: scale(1.1);
+    background-color: var(--hover-bg-color);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  }
+
+  .app-icon i {
+    font-size: 30px;
+    color: var(--text-color);
+  }
+
+  .app-name {
+    font-size: 12px;
+    color: var(--text-color);
+    text-align: center;
+    margin-top: 5px;
+    text-shadow: 1px 1px 3px var(--shadow-color);
+  }
+
+  .dock {
+    background-color: var(--hover-bg-color);
+    border-radius: 20px 20px 0 0;
+    padding: 10px;
+    display: flex;
+    justify-content: space-around;
+    overflow-x: auto;
+  }
+
+  .dock .app-icon {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+  }
+
+  .dock .app-icon i {
+    font-size: 24px;
+  }
+
+  .category {
+    display: none;
+  }
+
+  .category.active {
+    display: block;
+  }
+
+  .category-title {
+    width: 100%;
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    .app-icon {
+      width: 70px;
+      height: 70px;
+    }
+
+    .app-icon i {
+      font-size: 28px;
+    }
+
+    .app-name {
+      font-size: 11px;
+    }
+
+    .dock .app-icon {
+      width: 55px;
+      height: 55px;
+    }
+
+    .dock .app-icon i {
+      font-size: 22px;
+    }
+
+    .category-title {
+      font-size: 22px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .status-bar {
+      font-size: 12px;
+      padding: 5px 10px;
+    }
+
+    .container {
+      padding: 10px;
+    }
+
+    .app-icon {
+      width: 60px;
+      height: 60px;
+    }
+
+    .app-icon i {
+      font-size: 24px;
+    }
+
+    .app-name {
+      font-size: 10px;
+    }
+
+    .dock .app-icon {
+      width: 50px;
+      height: 50px;
+    }
+
+    .dock .app-icon i {
+      font-size: 20px;
+    }
+
+    .category-title {
+      font-size: 20px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="status-bar">
+    <span>智能设备</span>
+    <span id="clock"></span>
+    <span id="battery">100%</span>
+  </div>
+  <div class="container" id="app-container"></div>
+  <div class="dock" id="category-dock"></div>
+
+  <script>
+    const appContainer = document.getElementById('app-container');
+    const categoryDock = document.getElementById('category-dock');
+
+    const categories = {
+      social: { name: '社交', icon: 'fas fa-users' },
+      entertainment: { name: '娱乐', icon: 'fas fa-film' },
+      productivity: { name: '生产力', icon: 'fas fa-briefcase' },
+      news: { name: '新闻', icon: 'fas fa-newspaper' },
+      shopping: { name: '购物', icon: 'fas fa-shopping-cart' },
+      education: { name: '教育', icon: 'fas fa-graduation-cap' },
+      tech: { name: '科技', icon: 'fas fa-microchip' },
+      travel: { name: '旅行', icon: 'fas fa-plane' }
+    };
+
+    const apps = [
+      { name: '谷歌', url: 'https://www.google.com', icon: 'fab fa-google', category: 'productivity' },
+      { name: 'YouTube', url: 'https://www.youtube.com', icon: 'fab fa-youtube', category: 'entertainment' },
+      { name: '脸书', url: 'https://www.facebook.com', icon: 'fab fa-facebook-f', category: 'social' },
+      { name: '推特', url: 'https://www.twitter.com', icon: 'fab fa-twitter', category: 'social' },
+      { name: 'Instagram', url: 'https://www.instagram.com', icon: 'fab fa-instagram', category: 'social' },
+      { name: '领英', url: 'https://www.linkedin.com', icon: 'fab fa-linkedin-in', category: 'social' },
+      { name: '亚马逊', url: 'https://www.amazon.com', icon: 'fab fa-amazon', category: 'shopping' },
+      { name: '维基百科', url: 'https://www.wikipedia.org', icon: 'fab fa-wikipedia-w', category: 'education' },
+      { name: '网飞', url: 'https://www.netflix.com', icon: 'fas fa-film', category: 'entertainment' },
+      { name: '抖音', url: 'https://www.tiktok.com', icon: 'fab fa-tiktok', category: 'social' },
+      { name: 'Reddit', url: 'https://www.reddit.com', icon: 'fab fa-reddit-alien', category: 'social' },
+      { name: '微软', url: 'https://www.microsoft.com', icon: 'fab fa-microsoft', category: 'tech' },
+      { name: 'eBay', url: 'https://www.ebay.com', icon: 'fab fa-ebay', category: 'shopping' },
+      { name: 'Twitch', url: 'https://www.twitch.tv', icon: 'fab fa-twitch', category: 'entertainment' },
+      { name: '苹果', url: 'https://www.apple.com', icon: 'fab fa-apple', category: 'tech' },
+      { name: '必应', url: 'https://www.bing.com', icon: 'fab fa-microsoft', category: 'productivity' },
+      { name: '雅虎', url: 'https://www.yahoo.com', icon: 'fab fa-yahoo', category: 'productivity' },
+      { name: 'WhatsApp', url: 'https://web.whatsapp.com', icon: 'fab fa-whatsapp', category: 'social' },
+      { name: 'Zoom', url: 'https://zoom.us', icon: 'fas fa-video', category: 'productivity' },
+      { name: 'Spotify', url: 'https://www.spotify.com', icon: 'fab fa-spotify', category: 'entertainment' },
+      { name: 'Booking', url: 'https://www.booking.com', icon: 'fas fa-bed', category: 'travel' },
+      { name: 'Office', url: 'https://www.office.com', icon: 'fas fa-file-word', category: 'productivity' },
+      { name: 'Stack Overflow', url: 'https://stackoverflow.com', icon: 'fab fa-stack-overflow', category: 'tech' },
+      { name: 'GitHub', url: 'https://github.com', icon: 'fab fa-github', category: 'tech' },
+      { name: 'Dropbox', url: 'https://www.dropbox.com', icon: 'fab fa-dropbox', category: 'productivity' },
+      { name: 'CNN', url: 'https://www.cnn.com', icon: 'fas fa-newspaper', category: 'news' },
+      { name: 'BBC', url: 'https://www.bbc.com', icon: 'fas fa-broadcast-tower', category: 'news' },
+      { name: '纽约时报', url: 'https://www.nytimes.com', icon: 'far fa-newspaper', category: 'news' },
+      { name: '福布斯', url: 'https://www.forbes.com', icon: 'fas fa-chart-line', category: 'news' },
+      { name: 'IMDb', url: 'https://www.imdb.com', icon: 'fas fa-film', category: 'entertainment' },
+      { name: 'ESPN', url: 'https://www.espn.com', icon: 'fas fa-football-ball', category: 'entertainment' },
+      { name: 'Etsy', url: 'https://www.etsy.com', icon: 'fab fa-etsy', category: 'shopping' },
+      { name: 'PayPal', url: 'https://www.paypal.com', icon: 'fab fa-paypal', category: 'shopping' },
+      { name: 'Coursera', url: 'https://www.coursera.org', icon: 'fas fa-graduation-cap', category: 'education' },
+      { name: 'Udemy', url: 'https://www.udemy.com', icon: 'fas fa-chalkboard-teacher', category: 'education' },
+      { name: '可汗学院', url: 'https://www.khanacademy.org', icon: 'fas fa-book-open', category: 'education' },
+      { name: '多邻国', url: 'https://www.duolingo.com', icon: 'fas fa-language', category: 'education' },
+      { name: 'Airbnb', url: 'https://www.airbnb.com', icon: 'fas fa-home', category: 'travel' },
+      { name: 'Tripadvisor', url: 'https://www.tripadvisor.com', icon: 'fab fa-tripadvisor', category: 'travel' },
+      { name: 'Expedia', url: 'https://www.expedia.com', icon: 'fas fa-plane-departure', category: 'travel' }
+    ];
+
+    function createAppIcon(app) {
+      const appIcon = document.createElement('a');
+      appIcon.href = app.url;
+      appIcon.className = 'app-icon';
+      appIcon.target = '_blank';
+      appIcon.innerHTML = `
+        <i class="${app.icon}"></i>
+        <span class="app-name">${app.name}</span>
+      `;
+      return appIcon;
+    }
+
+    function showCategory(categoryName) {
+      const categories = appContainer.getElementsByClassName('category');
+      for (let category of categories) {
+        category.classList.remove('active');
+      }
+      document.getElementById(categoryName).classList.add('active');
+    }
+
+    Object.keys(categories).forEach(categoryName => {
+      const category = categories[categoryName];
+      const categoryElement = document.createElement('div');
+      categoryElement.id = categoryName;
+      categoryElement.className = 'category';
+      
+      const categoryTitle = document.createElement('h2');
+      categoryTitle.className = 'category-title';
+      categoryTitle.textContent = category.name;
+      categoryElement.appendChild(categoryTitle);
+
+      const appGrid = document.createElement('div');
+      appGrid.className = 'app-grid';
+      
+      const categoryApps = apps.filter(app => app.category === categoryName);
+      categoryApps.forEach(app => {
+        appGrid.appendChild(createAppIcon(app));
+      });
+
+      categoryElement.appendChild(appGrid);
+      appContainer.appendChild(categoryElement);
+
+      const dockIcon = document.createElement('a');
+      dockIcon.className = 'app-icon';
+      dockIcon.href = '#';
+      dockIcon.innerHTML = `
+        <i class="${category.icon}"></i>
+        <span class="app-name">${category.name}</span>
+      `;
+      dockIcon.addEventListener('click', (e) => {
+        e.preventDefault();
+        showCategory(categoryName);
+      });
+      categoryDock.appendChild(dockIcon);
+    });
+
+    showCategory('social');  // 默认显示社交分类
+
+    function updateClock() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('zh-CN', { hour: 'numeric', minute: '2-digit' });
+      document.getElementById('clock').textContent = timeString;
+    }
+
+    function updateBattery() {
+      if ('getBattery' in navigator) {
+        navigator.getBattery().then(battery => {
+          const level = Math.floor(battery.level * 100);
+          document.getElementById('battery').textContent = `${level}%`;
+        });
+      }
+    }
+
+    updateClock();
+    updateBattery();
+    setInterval(updateClock, 1000);
+    setInterval(updateBattery, 60000);
+  </script>
+</body></html>
