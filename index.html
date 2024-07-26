@@ -175,6 +175,7 @@
       flex: 1;
       padding: 10px;
       overflow-y: auto;
+      padding-bottom: 80px; /* Add padding to accommodate the dock */
     }
 
     .app-icon {
@@ -191,7 +192,7 @@
     }
 
     .dock {
-      position: sticky;
+      position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
@@ -201,6 +202,7 @@
       border-radius: 20px 20px 0 0;
       background-color: rgba(255, 255, 255, 0.2);
       backdrop-filter: blur(10px);
+      z-index: 1000;
     }
 
     .dock .app-icon {
@@ -430,5 +432,29 @@
         }
       }
     }
+
+    // 添加滚动监听，以调整底部导航栏的显示
+    let lastScrollTop = 0;
+    const dock = document.getElementById('category-dock');
+    const container = document.querySelector('.container');
+
+    container.addEventListener('scroll', () => {
+      let st = container.scrollTop;
+      if (st > lastScrollTop) {
+        // 向下滚动
+        dock.style.transform = 'translateY(100%)';
+      } else {
+        // 向上滚动
+        dock.style.transform = 'translateY(0)';
+      }
+      lastScrollTop = st <= 0 ? 0 : st;
+    }, false);
+
+    // 添加触摸结束事件，以确保底部导航栏在滚动停止时显示
+    container.addEventListener('touchend', () => {
+      setTimeout(() => {
+        dock.style.transform = 'translateY(0)';
+      }, 300);
+    }, false);
   </script>
 </body></html>
